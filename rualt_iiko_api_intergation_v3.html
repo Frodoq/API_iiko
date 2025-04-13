@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iiko API Integration</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: #fff;
+            --border-color: #ddd;
+            --primary-color: #4CAF50;
+            --primary-hover: #e2e2e2;
+            --pre-bg: #f0f0f0;
+            --secondary-color: #2196F3;
+            --secondary-hover: #0b7dda;
+            --checkbox-color: #4CAF50;
+            --reset-color: #f44336;
+            --reset-hover: #d32f2f;
+            --notification-bg: rgba(0, 0, 0, 0.8);
+            --notification-text: #fff;
+        }
+
+        .dark-theme {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --container-bg: #2d2d2d;
+            --border-color: #444;
+            --primary-color: #2E7D32;
+            --primary-hover: #1B5E20;
+            --pre-bg: #333;
+            --secondary-color: #1976D2;
+            --secondary-hover: #1565C0;
+            --checkbox-color: #959595;
+            --reset-color: #c62828;
+            --reset-hover: #b71c1c;
+            --notification-bg: rgba(255, 255, 255, 0.9);
+            --notification-text: #000;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        pre {
+            background-color: var(--pre-bg);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            transition: all 0.3s ease;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            width: 60px;
+            height: 30px;
+            background-color: var(--border-color);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .theme-toggle-handle {
+            width: 26px;
+            height: 26px;
+            background-color: var(--container-bg);
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-handle img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .dark-theme .theme-toggle-handle {
+            transform: translateX(30px);
+        }
+
+        .data-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .data-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .data-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .data-label {
+            min-width: 120px;
+            font-weight: 500;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .price-categories {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        .debug-container {
+            margin-top: 20px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: rgba(0,0,0,0.1);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .debug-content {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background-color: var(--pre-bg);
+    }
+    
+    .debug-content.expanded {
+        padding: 12px;
+        max-height: 400px; /* Фиксированная высота */
+        overflow-y: auto;  /* Вертикальный скролл */
+    }
+
+    .debug-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .debug-content::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+        border-radius: 4px;
+    }
+    
+    .debug-content::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 4px;
+    }
+    
+    .debug-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(0,0,0,0.3);
+    }
+
+        .debug-toggle {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .debug-toggle:hover {
+            color: var(--secondary-hover);
+            text-decoration: underline;
+        }
+
+        .org-id-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 4px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title h2 {
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--checkbox-color);
+            border-radius: 3px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .checkbox-custom::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 1px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            opacity: 0;
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        input[type="checkbox"]:checked + .checkbox-custom {
+            background-color: var(--checkbox-color);
+        }
+
+        input[type="checkbox"]:checked + .checkbox-custom::after {
+            opacity: 1;
+        }
+
+        .config-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 6px;
+        }
+
+        .config-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .generate-btn {
+            background-color: var(--secondary-color);
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .reset-btn {
+            background-color: var(--reset-color);
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background-color: var(--reset-hover);
+        }
+
+        .menu-type-selector {
+            margin-left: 10px;
+        }
+
+        .menu-type-selector select {
+            width: auto;
+            padding: 5px;
+            margin-left: 5px;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .sections-container {
+            margin-top: 20px;
+        }
+        
+        .section-item {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .section-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .tables-container {
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .tables-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .table-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 4px;
+        }
+        
+        .table-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        .table-number {
+            width: 80px;
+            font-weight: bold;
+        }
+        
+        .table-name {
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        
+        .table-id {
+            width: 300px;
+            font-family: monospace;
+            color: var(--secondary-color);
+        }
+        
+        .select-table-btn {
+            margin-left: 15px;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
+        .config-edit {
+            width: 100%;
+            min-height: 300px;
+            font-family: monospace;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background-color: var(--notification-bg);
+            color: var(--notification-text);
+            border-radius: 4px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .rualt-highlight,
+        .order-type-highlight,
+        .table-99-highlight,
+        .rualt-menu-highlight {
+            animation: highlightBlink 1s infinite ease-in-out;
+        }
+
+        @keyframes highlightBlink {
+            0% { background-color: rgba(199, 199, 199, 0.2); }
+            50% { background-color: rgba(199, 199, 199, 0.5); }
+            100% { background-color: rgba(199, 199, 199, 0.2); }
+        }
+        
+        .response-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .response-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .response-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        
+        .response-container::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        
+        .response-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .section-selector {
+            margin-bottom: 15px;
+        }
+
+        .section-selector select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+            
+            .data-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .data-label {
+                margin-bottom: 5px;
+            }
+            
+            .checkbox-container {
+                margin-top: 10px;
+            }
+            
+            .theme-toggle-container {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .config-actions {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .table-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .table-number, .table-name, .table-id {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .select-table-btn {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle-container">
+        <span>Тема:</span>
+        <div class="theme-toggle" id="themeToggle">
+            <div class="theme-toggle-handle">
+                <img id="themeIcon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTIgMThjLTMuMzEgMC02LTIuNjktNi02czIuNjktNiA2LTYgNiAyLjY5IDYgNi0yLjY5IDYtNiA2bTAtMmw0IDRoLThsNC00bTAtMTBsLTMgM2g2bC0zLTNNMTIgMmw0IDRoLThsNC00TTYgMTJsLTMtM2g2bC0zIDNNMTggMTJsMy0zaC02bDMgM00xMiAyMnYtNG0wLTE2djRNNS4yMyA1LjIzIDcuMDQgNy4wNE0xNi45NiA3LjA0bDEuODEtMS44MU0xOC43MSAxMmgyLjA2TTEyIDE4Ljcxdi0yLjA2TTcuMDQgMTYuOTYgNS4yMyAxOC43N00xOC43MSAxMmgyLjA2TTEyIDUuMjlWNy4zNE0xNi45NiAxNi45NmwxLjgxIDEuODFNMTIgMTJtLTMuNS0zLjVhMy41IDMuNSAwIDEgMSA3IDAgMy41IDMuNSAwIDAgMS03IDBaIi8+PC9zdmc+" alt="Sun">
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <div class="container">
+        <div class="panel full-width">
+            <div class="section-title">
+                <h2>Авторизация</h2>
+            </div>
+            <input type="text" id="apiKey" placeholder="Введите API ключ iiko">
+            <button id="getToken">Получить токен</button>
+            <div id="tokenStatus" class="status"></div>
+            <pre id="tokenResult"></pre>
+        </div>
+
+        <div class="panel" id="orgSection" style="display: none;">
+            <div class="section-title">
+                <h2>Данные организации</h2>
+            </div>
+            <div id="orgSelectContainer" style="display: none; margin-top: 15px;">
+                <select id="orgSelect"></select>
+                <div id="orgIdContainer" class="org-id-container" style="margin-top: 10px;">
+                    <span class="data-label">ID организации: </span>
+                    <span id="orgIdValue" style="font-family: monospace;"></span>
+                    <button class="select-btn" id="selectOrgBtn" style="margin-left: 15px;">Выбрать</button>
+                </div>
+            </div>
+            <div id="orgsStatus" class="status"></div>
+            <div id="orgsResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('orgsDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="orgsDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel" id="menuSection" style="display: none;">
+            <div class="section-title">
+                <h2>Меню</h2>
+            </div>
+            <div id="menuResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('menuDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="menuDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel" id="terminalsSection" style="display: none;">
+            <div class="section-title">
+                <h2>Терминалы</h2>
+            </div>
+            <div id="terminalsResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('terminalsDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="terminalsDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel" id="tablesSection" style="display: none;">
+            <div class="section-title">
+                <h2>Отделения и столы ресторана</h2>
+            </div>
+            <div class="section-selector" id="sectionSelectorContainer" style="display: none;">
+                <label for="sectionSelect">Выберите отделение:</label>
+                <select id="sectionSelect"></select>
+            </div>
+            <div id="tablesResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('tablesDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="tablesDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel" id="orderTypesSection" style="display: none;">
+            <div class="section-title">
+                <h2>Типы заказов</h2>
+            </div>
+            <div id="orderTypesResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('orderTypesDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="orderTypesDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel" id="paymentTypesSection" style="display: none;">
+            <div class="section-title">
+                <h2>Типы оплат</h2>
+            </div>
+            <div id="paymentTypesResult" class="response-container"></div>
+            <div class="debug-container">
+                <div class="debug-header">
+                    <button class="debug-toggle" onclick="toggleDebug('paymentTypesDebug')">
+                        <span>Показать полный ответ API</span>
+                        <span>▼</span>
+                    </button>
+                </div>
+                <pre id="paymentTypesDebug" class="debug-content"></pre>
+            </div>
+        </div>
+
+        <div class="panel config-panel full-width" id="configSection" style="display: none;">
+            <div class="config-title">Конфигурация iikoConfig.json</div>
+            <textarea id="configEdit" class="config-edit"></textarea>
+            <div class="config-actions">
+                <button id="generateConfig" class="generate-btn">Сгенерировать и скачать конфигурацию</button>
+                <button id="resetConfig" class="reset-btn">Сбросить конфигурацию</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://workers-playground-raspy-field-b7e5.spa-fhm.workers.dev/api';
+        let token = '';
+        let selectedOrgId = '';
+        let defaultPriceCategoryId = '00000000-0000-0000-0000-000000000000';
+        let configData = {
+            ApiLogin: "",
+            ExternalMenuId: "",
+            AssetsProfileId: "",
+            OrganizationId: "",
+            TerminalGroupId: "",
+            PaymentTypeId: "",
+            TableId: "",
+            MenuPriceCategoryId: defaultPriceCategoryId,
+            TabName: "",
+            OrderTypes: [],
+            UseCombos: false,
+            UseEmailForBills: false,
+            UsePhoneForBills: false,
+            EnableCashPayment: false,
+            CloseOrdersWhenCardPayment: true,
+            IikoServerAddress: "",
+            IikoServerLogin: "",
+            IikoServerPassword: "",
+            ComboOperationalPeriods: []
+        };
+
+        // Элементы DOM
+        const apiKeyInput = document.getElementById('apiKey');
+        const getTokenBtn = document.getElementById('getToken');
+        const tokenResult = document.getElementById('tokenResult');
+        const tokenStatus = document.getElementById('tokenStatus');
+        const orgSection = document.getElementById('orgSection');
+        const orgsResult = document.getElementById('orgsResult');
+        const orgsStatus = document.getElementById('orgsStatus');
+        const orgSelect = document.getElementById('orgSelect');
+        const orgIdValue = document.getElementById('orgIdValue');
+        const selectOrgBtn = document.getElementById('selectOrgBtn');
+        const menuSection = document.getElementById('menuSection');
+        const menuResult = document.getElementById('menuResult');
+        const terminalsSection = document.getElementById('terminalsSection');
+        const terminalsResult = document.getElementById('terminalsResult');
+        const tablesSection = document.getElementById('tablesSection');
+        const tablesResult = document.getElementById('tablesResult');
+        const sectionSelect = document.getElementById('sectionSelect');
+        const orderTypesSection = document.getElementById('orderTypesSection');
+        const orderTypesResult = document.getElementById('orderTypesResult');
+        const paymentTypesSection = document.getElementById('paymentTypesSection');
+        const paymentTypesResult = document.getElementById('paymentTypesResult');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const configSection = document.getElementById('configSection');
+        const configEdit = document.getElementById('configEdit');
+        const generateConfigBtn = document.getElementById('generateConfig');
+        const resetConfigBtn = document.getElementById('resetConfig');
+        const notification = document.getElementById('notification');
+        
+        // SVG иконки для темы
+        const moonIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTIgM2MxLjU0IDAgMy4wMy40IDQuNDMgMS4xMXMtMi41NSAyLjgzLTMuMTkgNC41My0xLjA5IDMuNzctMS4xNSA1Ljg3Yy0xLjYxLS43Mi0yLjg4LTIuMDQtMy40Mi0zLjY3LS41NC0xLjYzLS4zMi0zLjM1LjM3LTQuODFzMS45LTIuNjQgMy41LTMuNDNNMTIgM2MtMS41IDAtMi45OC4yLTQuMzYuODVzLTIuNDkgMS40OS0zLjI0IDIuNjQtMS4wMSAyLjY0LTEuMDggNC4wNWMuMDIgMS4zLjM5IDIuNTQgMS4wMyAzLjY3LjY0IDEuMTMgMS41NSAyLjA3IDIuNjUgMi43NnMyLjM1IDEuMDQgMy42OCAxLjE0Yy0uMDktMS45OS4xNi0zLjk5Ljg0LTUuOTNzMS45LTMuNTcgMy40My00Ljg4UzEwLjQ5IDMgMTIgM20wIDJjLTEuMjggMC0yLjQ2LjQzLTMuMzggMS4xNXMtMS40OCAxLjc4LTEuNTQgMi45OS4zNyAyLjQzIDEuMjUgMy40NCAyLjEgMS42NSAzLjQzIDEuODVjLS4xMS0xLjQzLjA1LTIuODYuNDYtNC4yNXMuOTktMi42NSAxLjgxLTMuNzUtMS4xLTEuOTQtMi4wMy0yLjU1LTEuOTItLjkzLTMtLjk0WiIvPjwvc3ZnPg==';
+        const sunIcon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTIgMThjLTMuMzEgMC02LTIuNjktNi02czIuNjktNiA2LTYgNiAyLjY5IDYgNi0yLjY5IDYtNiA2bTAtMmw0IDRoLThsNC00bTAtMTBsLTMgM2g2bC0zLTNNMTIgMmw0IDRoLThsNC00TTYgMTJsLTMtM2g2bC0zIDNNMTggMTJsMy0zaC02bDMgM00xMiAyMnYtNG0wLTE2djRNNS4yMyA1LjIzIDcuMDQgNy4wNE0xNi45NiA3LjA0bDEuODEtMS44MU0xOC43MSAxMmgyLjA2TTEyIDE4Ljcxdi0yLjA2TTcuMDQgMTYuOTYgNS4yMyAxOC43N00xOC43MSAxMmgyLjA2TTEyIDUuMjlWNy4zNE0xNi45NiAxNi45NmwxLjgxIDEuODFNMTIgMTJtLTMuNS0zLjVhMy41IDMuNSAwIDEgMSA3IDAgMy41IDMuNSAwIDAgMS03IDBaIi8+PC9zdmc+';
+        
+        // Проверяем сохраненную тему
+        if (localStorage.getItem('darkTheme') === 'enabled') {
+            document.body.classList.add('dark-theme');
+            themeIcon.src = moonIcon;
+        } else {
+            themeIcon.src = sunIcon;
+        }
+
+        // Переключение темы
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            themeIcon.src = isDark ? moonIcon : sunIcon;
+            localStorage.setItem('darkTheme', isDark ? 'enabled' : 'disabled');
+        });
+
+        function showStatus(element, message, isSuccess) {
+            element.textContent = message;
+            element.className = isSuccess ? 'status success' : 'status error';
+            element.style.display = 'block';
+        }
+
+        function showNotification(message, isSuccess = true) {
+            notification.textContent = message;
+            notification.className = isSuccess ? 'notification show success' : 'notification show error';
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleDebug(id) {
+        const debugContent = document.getElementById(id);
+        const toggleBtn = debugContent.previousElementSibling.querySelector('.debug-toggle');
+        
+        debugContent.classList.toggle('expanded');
+        const arrow = toggleBtn.querySelector('span:last-child');
+        arrow.textContent = debugContent.classList.contains('expanded') ? '▲' : '▼';
+        
+        // Обновляем текст кнопки
+        const toggleText = toggleBtn.querySelector('span:first-child');
+        if (debugContent.classList.contains('expanded')) {
+            toggleText.textContent = 'Скрыть полный ответ API';
+            
+            // Прокручиваем к началу при открытии
+            setTimeout(() => {
+                debugContent.scrollTop = 0;
+            }, 10);
+        } else {
+            toggleText.textContent = 'Показать полный ответ API';
+        }
+    }
+
+
+        function resetConfig() {
+            configData = {
+                ApiLogin: apiKeyInput.value.trim(),
+                ExternalMenuId: "",
+                AssetsProfileId: "",
+                OrganizationId: "",
+                TerminalGroupId: "",
+                PaymentTypeId: "",
+                TableId: "",
+                MenuPriceCategoryId: defaultPriceCategoryId,
+                TabName: "",
+                OrderTypes: [],
+                UseCombos: false,
+                UseEmailForBills: false,
+                UsePhoneForBills: false,
+                EnableCashPayment: false,
+                CloseOrdersWhenCardPayment: true,
+                IikoServerAddress: "",
+                IikoServerLogin: "",
+                IikoServerPassword: "",
+                ComboOperationalPeriods: []
+            };
+
+            document.querySelectorAll('.menu-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                const menuTypeSelector = checkbox.closest('.checkbox-container').querySelector('.menu-type-selector');
+                if (menuTypeSelector) {
+                    menuTypeSelector.style.display = 'none';
+                    menuTypeSelector.querySelector('.menu-type-select').value = "";
+                }
+            });
+
+            document.querySelectorAll('.order-type-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+            });
+
+            updateConfigEdit();
+        }
+
+        function updateConfigEdit() {
+            configEdit.value = JSON.stringify(configData, null, 2);
+        }
+
+        function clearAllResults() {
+            tokenResult.textContent = '';
+            orgsResult.innerHTML = '';
+            menuResult.innerHTML = '';
+            terminalsResult.innerHTML = '';
+            tablesResult.innerHTML = '';
+            orderTypesResult.innerHTML = '';
+            paymentTypesResult.innerHTML = '';
+            
+            document.getElementById('orgsDebug').textContent = '';
+            document.getElementById('menuDebug').textContent = '';
+            document.getElementById('terminalsDebug').textContent = '';
+            document.getElementById('tablesDebug').textContent = '';
+            document.getElementById('orderTypesDebug').textContent = '';
+            document.getElementById('paymentTypesDebug').textContent = '';
+            
+            orgSelect.innerHTML = '';
+            sectionSelect.innerHTML = '';
+            sectionSelectorContainer.style.display = 'none';
+            
+            orgSection.style.display = 'none';
+            menuSection.style.display = 'none';
+            terminalsSection.style.display = 'none';
+            tablesSection.style.display = 'none';
+            orderTypesSection.style.display = 'none';
+            paymentTypesSection.style.display = 'none';
+            configSection.style.display = 'none';
+            
+            configData = {
+                ...configData,
+                ExternalMenuId: "",
+                AssetsProfileId: "",
+                OrganizationId: "",
+                TerminalGroupId: "",
+                PaymentTypeId: "",
+                TableId: "",
+                OrderTypes: []
+            };
+            updateConfigEdit();
+        }
+
+        // 1. Получение токена
+        getTokenBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                showStatus(tokenStatus, 'Введите API ключ', false);
+                return;
+            }
+
+            try {
+                showStatus(tokenStatus, 'Получение токена...', true);
+                clearAllResults();
+                
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        endpoint: '/api/1/access_token',
+                        body: { apiLogin: apiKey }
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP error ${response.status}`);
+                }
+
+                const data = await response.json();
+                token = data.token;
+                tokenResult.textContent = `${token}`;
+                showStatus(tokenStatus, 'Токен успешно получен', true);
+                
+                configData.ApiLogin = apiKey;
+                updateConfigEdit();
+                
+                orgSection.style.display = 'block';
+                fetchAllData();
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                tokenResult.textContent = '';
+                showStatus(tokenStatus, `Ошибка: ${error.message}`, false);
+            }
+        });
+
+        async function fetchAllData() {
+            try {
+                await fetchOrganizations();
+                await fetchData('/api/2/menu', menuResult, displayMenuData);
+                await fetchData('/api/1/terminal_groups', terminalsResult, displayTerminalsData);
+                await fetchData('/api/1/deliveries/order_types', orderTypesResult, displayOrderTypesData);
+                await fetchData('/api/1/payment_types', paymentTypesResult, displayPaymentTypesData);
+                
+                menuSection.style.display = 'block';
+                terminalsSection.style.display = 'block';
+                tablesSection.style.display = 'block';
+                orderTypesSection.style.display = 'block';
+                paymentTypesSection.style.display = 'block';
+                configSection.style.display = 'block';
+
+            } catch (error) {
+                console.error('Ошибка при получении данных:', error);
+            }
+        }
+
+        async function fetchOrganizations() {
+            try {
+                showStatus(orgsStatus, 'Получение организаций...', true);
+                
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        endpoint: '/api/1/organizations',
+                        body: {
+                            organizationIds: null,
+                            returnAdditionalInfo: false,
+                            includeDisabled: false,
+                            token: token
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP error ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('orgsDebug').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.organizations && data.organizations.length > 0) {
+                    selectedOrgId = data.organizations[0].id;
+                }
+                
+                orgSelect.innerHTML = '';
+                data.organizations.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.id;
+                    option.textContent = `${org.name} (${org.id})`;
+                    orgSelect.appendChild(option);
+                    
+                    if (orgSelect.selectedIndex === -1) {
+                        orgSelect.selectedIndex = 0;
+                        selectedOrgId = org.id;
+                    }
+                });
+
+                document.getElementById('orgSelectContainer').style.display = 'block';
+                updateOrgIdDisplay();
+
+                orgSelect.addEventListener('change', (e) => {
+                    selectedOrgId = e.target.value;
+                    updateOrgIdDisplay();
+                });
+
+                selectOrgBtn.addEventListener('click', () => {
+                    configData.OrganizationId = selectedOrgId;
+                    updateConfigEdit();
+                    showNotification(`Организация "${orgSelect.options[orgSelect.selectedIndex].text}" выбрана`);
+                });
+
+                showStatus(orgsStatus, 'Организации успешно получены', true);
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                orgsResult.innerHTML = `<div class="error">${error.message}</div>`;
+                showStatus(orgsStatus, `Ошибка: ${error.message}`, false);
+            }
+        }
+
+        function updateOrgIdDisplay() {
+            orgIdValue.textContent = selectedOrgId;
+        }
+
+        async function fetchData(endpoint, resultElement, displayFunction) {
+            try {
+                if (!selectedOrgId) {
+                    throw new Error('Не выбрана организация');
+                }
+
+                let requestBody = { token: token };
+
+                switch(endpoint) {
+                    case '/api/2/menu':
+                        requestBody.organizationId = selectedOrgId;
+                        requestBody.startRevision = 0;
+                        requestBody.priceCategories = [defaultPriceCategoryId];
+                        break;
+                        
+                    case '/api/1/terminal_groups':
+                        requestBody.organizationIds = [selectedOrgId];
+                        requestBody.includeDisabled = false;
+                        break;
+                        
+                    case '/api/1/deliveries/order_types':
+                    case '/api/1/payment_types':
+                        requestBody.organizationIds = [selectedOrgId];
+                        break;
+                }
+
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        endpoint: endpoint,
+                        body: requestBody
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errorDescription || `HTTP error ${response.status}`);
+                }
+
+                const data = await response.json();
+                document.getElementById(`${resultElement.id.replace('Result', '')}Debug`).textContent = JSON.stringify(data, null, 2);
+                displayFunction(data, resultElement);
+                
+                if (endpoint === '/api/1/terminal_groups') {
+                    await fetchRestaurantSections(data.terminalGroups, tablesResult);
+                }
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultElement.innerHTML = `<div class="error">${error.message}</div>`;
+            }
+        }
+
+        async function fetchRestaurantSections(terminalGroups, resultElement) {
+            try {
+                let terminalGroupIds = [];
+                
+                if (Array.isArray(terminalGroups)) {
+                    if (terminalGroups[0]?.id) {
+                        terminalGroupIds = terminalGroups.map(group => group.id);
+                    } 
+                    else if (terminalGroups[0]?.items) {
+                        terminalGroupIds = terminalGroups.flatMap(group => 
+                            group.items.map(item => item.id || item.terminalId)
+                        );
+                    }
+                    else {
+                        terminalGroupIds = terminalGroups.flatMap(group => [
+                            group.terminalId,
+                            group.terminalGroupId,
+                            group.uuid
+                        ].filter(Boolean));
+                    }
+                } else if (terminalGroups && typeof terminalGroups === 'object') {
+                    terminalGroupIds = [
+                        terminalGroups.terminalId,
+                        terminalGroups.terminalGroupId,
+                        terminalGroups.uuid
+                    ].filter(Boolean);
+                } else {
+                    throw new Error('Неизвестный формат данных о терминалах');
+                }
+
+                terminalGroupIds = [...new Set(terminalGroupIds.filter(Boolean))];
+                
+                if (terminalGroupIds.length === 0) {
+                    throw new Error('Не найдено ID терминалов. Проверьте структуру данных.');
+                }
+
+                let sections = [];
+                let errors = [];
+                
+                for (const terminalGroupId of terminalGroupIds) {
+                    try {
+                        let requestBody = {
+                            endpoint: "/api/1/reserve/available_restaurant_sections",
+                            body: {
+                                terminalGroupIds: [terminalGroupId],
+                                token: token,
+                                organizationId: selectedOrgId
+                            }
+                        };
+
+                        const response = await fetch(WORKER_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(requestBody)
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            errors.push(`Ошибка для терминала ${terminalGroupId}: ${response.status} - ${errorData.message || 'Неизвестная ошибка'}`);
+                            continue;
+                        }
+
+                        const data = await response.json();
+                        let currentSections = [];
+                        
+                        if (Array.isArray(data)) {
+                            currentSections = data;
+                        } else if (data.restaurantSections) {
+                            currentSections = data.restaurantSections;
+                        } else if (data.sections) {
+                            currentSections = data.sections;
+                        } else if (data.items) {
+                            currentSections = data.items;
+                        } else {
+                            currentSections = Array.isArray(data) ? data : [];
+                        }
+                        
+                        currentSections.forEach(section => {
+                            if (!sections.some(s => s.id === section.id)) {
+                                sections.push(section);
+                            }
+                        });
+                        
+                    } catch (error) {
+                        errors.push(`Ошибка при запросе отделений для терминала ${terminalGroupId}: ${error.message}`);
+                    }
+                }
+
+                if (sections.length === 0) {
+                    let errorMsg = 'Не удалось получить отделения ресторана ни для одного терминала';
+                    if (errors.length > 0) {
+                        errorMsg += `. Ошибки: ${errors.join('; ')}`;
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                document.getElementById('tablesDebug').textContent = JSON.stringify({
+                    terminalGroupIds: terminalGroupIds,
+                    sections: sections,
+                    errors: errors,
+                    timestamp: new Date().toISOString()
+                }, null, 2);
+                
+                sectionSelect.innerHTML = '';
+                document.getElementById('sectionSelectorContainer').style.display = 'block';
+                
+                sections.sort((a, b) => {
+                    const aName = (a.name || '').toLowerCase();
+                    const bName = (b.name || '').toLowerCase();
+                    
+                    if (aName.includes('киоск') && !bName.includes('киоск')) return -1;
+                    if (!aName.includes('киоск') && bName.includes('киоск')) return 1;
+                    if (aName.includes('зал') && !bName.includes('зал')) return -1;
+                    if (!aName.includes('зал') && bName.includes('зал')) return 1;
+                    if (aName.includes('бар') && !bName.includes('бар')) return -1;
+                    if (!aName.includes('бар') && bName.includes('бар')) return 1;
+                    return 0;
+                });
+                
+                sections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section.id;
+                    option.textContent = section.name || 'Отделение без названия';
+                    sectionSelect.appendChild(option);
+                });
+                
+                sectionSelect.addEventListener('change', () => {
+                    const selectedSectionId = sectionSelect.value;
+                    const selectedSection = sections.find(s => s.id === selectedSectionId);
+                    displaySectionTables(selectedSection, resultElement);
+                });
+                
+                if (sections.length > 0) {
+                    sectionSelect.selectedIndex = 0;
+                    displaySectionTables(sections[0], resultElement);
+                } else {
+                    resultElement.innerHTML = '<div>Нет доступных отделений ресторана</div>';
+                }
+
+                return sections;
+
+            } catch (error) {
+                console.error('Критическая ошибка в fetchRestaurantSections:', error);
+                document.getElementById('tablesDebug').textContent += `\n\nОшибка: ${error.message}\nStack: ${error.stack}`;
+                resultElement.innerHTML += `<div class="error">${error.message}</div>`;
+                throw error;
+            }
+        }
+
+        function displaySectionTables(section, resultElement) {
+            resultElement.innerHTML = '';
+            
+            if (!section) {
+                resultElement.innerHTML = '<div>Отделение не найдено</div>';
+                return;
+            }
+            
+            const sectionItem = document.createElement('div');
+            sectionItem.className = 'section-item';
+            
+            const sectionHeader = document.createElement('div');
+            sectionHeader.className = 'section-header';
+            sectionHeader.textContent = section.name || 'Отделение без названия';
+            sectionItem.appendChild(sectionHeader);
+            
+            const sectionIdRow = document.createElement('div');
+            sectionIdRow.className = 'data-row';
+            sectionIdRow.innerHTML = `
+                <div class="data-label">ID отделения: </div>
+                <div>${section.id}</div>
+            `;
+            sectionItem.appendChild(sectionIdRow);
+            
+            if (section.tables && section.tables.length > 0) {
+                const tablesContainer = document.createElement('div');
+                tablesContainer.className = 'tables-container';
+                
+                const tablesHeader = document.createElement('div');
+                tablesHeader.className = 'tables-header';
+                tablesHeader.innerHTML = `
+                    <div class="table-number">Номер</div>
+                    <div class="table-name">Название</div>
+                    <div class="table-id">ID</div>
+                    <div style="width: 100px;">Действие</div>
+                `;
+                tablesContainer.appendChild(tablesHeader);
+                
+                section.tables.forEach(table => {
+                    if (table.isDeleted) return;
+                    
+                    const tableItem = document.createElement('div');
+                    tableItem.className = 'table-item';
+                    
+                    if (table.number === 99 || table.number === "99") {
+                        tableItem.classList.add('table-99-highlight');
+                    }
+                    
+                    const tableNumber = document.createElement('div');
+                    tableNumber.className = 'table-number';
+                    tableNumber.textContent = table.number || '—';
+                    
+                    const tableName = document.createElement('div');
+                    tableName.className = 'table-name';
+                    tableName.textContent = table.name || `Стол ${table.number || table.id}`;
+                    
+                    const tableId = document.createElement('div');
+                    tableId.className = 'table-id';
+                    tableId.textContent = table.id;
+                    
+                    const selectBtn = document.createElement('button');
+                    selectBtn.className = 'select-table-btn copy-btn';
+                    selectBtn.textContent = 'Выбрать';
+                    selectBtn.addEventListener('click', () => {
+                        configData.TableId = table.id;
+                        updateConfigEdit();
+                        showNotification(`Стол "${table.name || table.number || table.id}" успешно добавлен в конфигурацию`);
+                    });
+                    
+                    const actions = document.createElement('div');
+                    actions.style.width = '100px';
+                    actions.appendChild(selectBtn);
+                    
+                    tableItem.appendChild(tableNumber);
+                    tableItem.appendChild(tableName);
+                    tableItem.appendChild(tableId);
+                    tableItem.appendChild(actions);
+                    
+                    tablesContainer.appendChild(tableItem);
+                });
+                
+                sectionItem.appendChild(tablesContainer);
+            } else {
+                const noTables = document.createElement('div');
+                noTables.textContent = 'В этом отделении нет столов';
+                noTables.style.marginTop = '10px';
+                sectionItem.appendChild(noTables);
+            }
+            
+            resultElement.appendChild(sectionItem);
+            resultElement.style.display = 'block';
+        }
+
+        function displayMenuData(data, resultElement) {
+            resultElement.innerHTML = '';
+            document.getElementById('menuDebug').textContent = JSON.stringify(data, null, 2);
+            
+            if (!data.externalMenus || data.externalMenus.length === 0) {
+                resultElement.innerHTML += '<div>Нет доступных меню</div>';
+                return;
+            }
+
+            const container = document.createElement('div');
+            
+            if (data.priceCategories && data.priceCategories.length > 0) {
+                const priceCategoriesDiv = document.createElement('div');
+                priceCategoriesDiv.className = 'price-categories';
+                
+                const title = document.createElement('div');
+                title.className = 'data-title';
+                title.textContent = 'Категории цен:';
+                priceCategoriesDiv.appendChild(title);
+                
+                data.priceCategories.forEach(category => {
+                    const row = document.createElement('div');
+                    row.className = 'data-row';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'data-label price-category-label';
+                    label.textContent = category.name || 'Без названия';
+                    row.appendChild(label);
+                    
+                    const value = document.createElement('div');
+                    value.textContent = category.id;
+                    row.appendChild(value);
+                    
+                    priceCategoriesDiv.appendChild(row);
+                });
+                
+                container.appendChild(priceCategoriesDiv);
+            }
+
+            data.externalMenus.forEach(menu => {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                
+                if (menu.name && menu.name.toLowerCase().includes('rualt')) {
+                    item.classList.add('rualt-menu-highlight');
+                }
+                
+                const title = document.createElement('div');
+                title.className = 'data-title';
+                title.textContent = menu.name || 'Меню без названия';
+                item.appendChild(title);
+                
+                const idRow = document.createElement('div');
+                idRow.className = 'data-row';
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'data-label';
+                idLabel.textContent = 'ID меню: ';
+                idRow.appendChild(idLabel);
+                
+                const idValue = document.createElement('div');
+                idValue.textContent = menu.id;
+                idRow.appendChild(idValue);
+                
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `menu-${menu.id}`;
+                checkbox.className = 'menu-checkbox';
+                
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.htmlFor = `menu-${menu.id}`;
+                checkboxLabel.className = 'checkbox-custom';
+                
+                const checkboxText = document.createElement('span');
+                checkboxText.className = 'checkbox-label';
+                checkboxText.textContent = 'Выбрать';
+                
+                const menuTypeSelector = document.createElement('div');
+                menuTypeSelector.className = 'menu-type-selector';
+                menuTypeSelector.style.display = 'none';
+                
+                const menuTypeLabel = document.createElement('span');
+                menuTypeLabel.textContent = 'Тип:';
+                
+                const menuTypeSelect = document.createElement('select');
+                menuTypeSelect.className = 'menu-type-select';
+                menuTypeSelect.innerHTML = `
+                    <option value="">Нет</option>
+                    <option value="ExternalMenuId">Основное меню</option>
+                    <option value="AssetsProfileId">Баннеры</option>
+                `;
+                
+                menuTypeSelector.appendChild(menuTypeLabel);
+                menuTypeSelector.appendChild(menuTypeSelect);
+                
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(checkboxLabel);
+                checkboxContainer.appendChild(checkboxText);
+                checkboxContainer.appendChild(menuTypeSelector);
+                
+                idRow.appendChild(checkboxContainer);
+                item.appendChild(idRow);
+                
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        menuTypeSelector.style.display = 'inline-block';
+                    } else {
+                        menuTypeSelector.style.display = 'none';
+                        menuTypeSelect.value = "";
+                        if (configData.ExternalMenuId === menu.id) {
+                            configData.ExternalMenuId = "";
+                        }
+                        if (configData.AssetsProfileId === menu.id) {
+                            configData.AssetsProfileId = "";
+                        }
+                        updateConfigEdit();
+                    }
+                });
+                
+                menuTypeSelect.addEventListener('change', (e) => {
+                    const value = e.target.value;
+                    const menuId = menu.id;
+                    
+                    if (value === "ExternalMenuId") {
+                        configData.ExternalMenuId = menuId;
+                        if (configData.AssetsProfileId === menuId) {
+                            configData.AssetsProfileId = "";
+                        }
+                    } else if (value === "AssetsProfileId") {
+                        configData.AssetsProfileId = menuId;
+                        if (configData.ExternalMenuId === menuId) {
+                            configData.ExternalMenuId = "";
+                        }
+                    } else {
+                        if (configData.ExternalMenuId === menuId) {
+                            configData.ExternalMenuId = "";
+                        }
+                        if (configData.AssetsProfileId === menuId) {
+                            configData.AssetsProfileId = "";
+                        }
+                    }
+                    updateConfigEdit();
+                });
+                
+                if (menu.priceCategories && menu.priceCategories.length > 0) {
+                    const categoriesTitle = document.createElement('div');
+                    categoriesTitle.className = 'data-label';
+                    categoriesTitle.textContent = 'Категории цен:';
+                    item.appendChild(categoriesTitle);
+                    
+                    menu.priceCategories.forEach(catId => {
+                        const catRow = document.createElement('div');
+                        catRow.className = 'data-row';
+                        
+                        const catValue = document.createElement('div');
+                        catValue.textContent = catId;
+                        catRow.appendChild(catValue);
+                        
+                        item.appendChild(catRow);
+                    });
+                }
+                
+                container.appendChild(item);
+            });
+            
+            resultElement.appendChild(container);
+            resultElement.style.display = 'block';
+        }
+
+        function displayTerminalsData(data, resultElement) {
+            resultElement.innerHTML = '';
+            document.getElementById('terminalsDebug').textContent = JSON.stringify(data, null, 2);
+            
+            let terminals = [];
+            if (data.terminalGroups && data.terminalGroups.length > 0) {
+                data.terminalGroups.forEach(group => {
+                    if (group.items && group.items.length > 0) {
+                        terminals = terminals.concat(group.items);
+                    }
+                });
+            }
+
+            if (terminals.length === 0) {
+                resultElement.innerHTML += '<div>Нет доступных терминалов</div>';
+                return;
+            }
+
+            const container = document.createElement('div');
+            
+            terminals.forEach(terminal => {
+                if (!terminal.name && !terminal.id) return;
+                
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                
+                const title = document.createElement('div');
+                title.className = 'data-title';
+                title.textContent = terminal.name || 'Терминал без названия';
+                item.appendChild(title);
+                
+                const idRow = document.createElement('div');
+                idRow.className = 'data-row';
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'data-label';
+                idLabel.textContent = 'ID терминала: ';
+                idRow.appendChild(idLabel);
+                
+                const idValue = document.createElement('div');
+                idValue.textContent = terminal.id;
+                idRow.appendChild(idValue);
+                
+                const selectBtn = document.createElement('button');
+                selectBtn.className = 'select-btn';
+                selectBtn.textContent = 'Выбрать';
+                selectBtn.style.marginLeft = '15px';
+                selectBtn.addEventListener('click', () => {
+                    configData.TerminalGroupId = terminal.id;
+                    updateConfigEdit();
+                    showNotification(`Терминал "${terminal.name || terminal.id}" выбран`);
+                });
+                
+                idRow.appendChild(selectBtn);
+                item.appendChild(idRow);
+                
+                container.appendChild(item);
+            });
+            
+            resultElement.appendChild(container);
+            resultElement.style.display = 'block';
+        }
+
+        function displayOrderTypesData(data, resultElement) {
+            resultElement.innerHTML = '';
+            document.getElementById('orderTypesDebug').textContent = JSON.stringify(data, null, 2);
+            
+            let orderTypes = [];
+            if (data.orderTypes && data.orderTypes.length > 0) {
+                data.orderTypes.forEach(group => {
+                    if (group.items && group.items.length > 0) {
+                        orderTypes = orderTypes.concat(group.items);
+                    }
+                });
+            }
+
+            orderTypes = orderTypes.filter(type => !type.isDeleted);
+
+            if (orderTypes.length === 0) {
+                resultElement.innerHTML += '<div>Нет доступных типов заказов</div>';
+                return;
+            }
+
+            const container = document.createElement('div');
+            
+            orderTypes.forEach(orderType => {
+                if (!orderType.name && !orderType.id) return;
+                
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                
+                if (orderType.name && (
+                    orderType.name.toLowerCase().includes('в зале') || 
+                    orderType.name.toLowerCase().includes('с собой') || 
+                    orderType.name.toLowerCase().includes('здесь')
+                )) {
+                    item.classList.add('order-type-highlight');
+                }
+                
+                const title = document.createElement('div');
+                title.className = 'data-title';
+                title.textContent = orderType.name || 'Тип заказа без названия';
+                item.appendChild(title);
+                
+                const idRow = document.createElement('div');
+                idRow.className = 'data-row';
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'data-label';
+                idLabel.textContent = 'ID типа заказа: ';
+                idRow.appendChild(idLabel);
+                
+                const idValue = document.createElement('div');
+                idValue.textContent = orderType.id;
+                idRow.appendChild(idValue);
+                
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `order-type-${orderType.id}`;
+                checkbox.className = 'order-type-checkbox';
+                
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.htmlFor = `order-type-${orderType.id}`;
+                checkboxLabel.className = 'checkbox-custom';
+                
+                const checkboxText = document.createElement('span');
+                checkboxText.className = 'checkbox-label';
+                checkboxText.textContent = 'Выбрать';
+                
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(checkboxLabel);
+                checkboxContainer.appendChild(checkboxText);
+                idRow.appendChild(checkboxContainer);
+                
+                item.appendChild(idRow);
+                
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        if (!configData.OrderTypes.some(ot => ot.OrderTypeId === orderType.id)) {
+                            configData.OrderTypes.push({
+                                OrderTypeId: orderType.id,
+                                OrderTypeName: orderType.name || ''
+                            });
+                        }
+                        
+                        // Если выбрано 2 чекбокса - блокируем остальные
+                        if (configData.OrderTypes.length >= 2) {
+                            document.querySelectorAll('.order-type-checkbox:not(:checked)').forEach(cb => {
+                                cb.disabled = true;
+                            });
+                        }
+                    } else {
+                        configData.OrderTypes = configData.OrderTypes.filter(ot => ot.OrderTypeId !== orderType.id);
+                        // Разблокируем все чекбоксы при снятии выбора
+                        document.querySelectorAll('.order-type-checkbox').forEach(cb => {
+                            cb.disabled = false;
+                        });
+                    }
+                    updateConfigEdit();
+                });
+                
+                container.appendChild(item);
+            });
+            
+            resultElement.appendChild(container);
+            resultElement.style.display = 'block';
+        }
+
+        function displayPaymentTypesData(data, resultElement) {
+            resultElement.innerHTML = '';
+            document.getElementById('paymentTypesDebug').textContent = JSON.stringify(data, null, 2);
+            
+            const paymentTypes = data.paymentTypes || (Array.isArray(data) ? data : []);
+
+            if (!paymentTypes || paymentTypes.length === 0) {
+                resultElement.innerHTML += '<div>Нет доступных типов оплат</div>';
+                return;
+            }
+
+            const container = document.createElement('div');
+            
+            paymentTypes.forEach(paymentType => {
+                if (!paymentType.name && !paymentType.id) return;
+                
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                
+                if (paymentType.name && paymentType.name.toLowerCase().includes('rualt')) {
+                    item.classList.add('rualt-highlight');
+                }
+                
+                const title = document.createElement('div');
+                title.className = 'data-title';
+                title.textContent = paymentType.name || 'Тип оплаты без названия';
+                item.appendChild(title);
+                
+                const idRow = document.createElement('div');
+                idRow.className = 'data-row';
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'data-label';
+                idLabel.textContent = 'ID типа оплаты: ';
+                idRow.appendChild(idLabel);
+                
+                const idValue = document.createElement('div');
+                idValue.textContent = paymentType.id;
+                idRow.appendChild(idValue);
+                
+                const selectBtn = document.createElement('button');
+                selectBtn.className = 'select-btn';
+                selectBtn.textContent = 'Выбрать';
+                selectBtn.style.marginLeft = '15px';
+                selectBtn.addEventListener('click', () => {
+                    configData.PaymentTypeId = paymentType.id;
+                    updateConfigEdit();
+                    showNotification(`Тип оплаты "${paymentType.name || paymentType.id}" выбран`);
+                });
+                
+                idRow.appendChild(selectBtn);
+                item.appendChild(idRow);
+                
+                container.appendChild(item);
+            });
+            
+            resultElement.appendChild(container);
+            resultElement.style.display = 'block';
+        }
+
+        generateConfigBtn.addEventListener('click', () => {
+            try {
+                // Валидация обязательных полей
+                const missingFields = [];
+                
+                if (!configData.ExternalMenuId) {
+                    missingFields.push('Меню (Основное меню)');
+                }
+                
+                if (!configData.AssetsProfileId) {
+                    missingFields.push('Меню (Баннеры)');
+                }
+                
+                if (!configData.OrganizationId) {
+                    missingFields.push('Данные организации');
+                }
+                
+                if (!configData.TerminalGroupId) {
+                    missingFields.push('Терминалы');
+                }
+                
+                if (!configData.PaymentTypeId) {
+                    missingFields.push('Типы оплат');
+                }
+                
+                if (!configData.TableId) {
+                    missingFields.push('Отделения и столы ресторана');
+                }
+                
+                if (configData.OrderTypes.length < 2) {
+                    showNotification('Необходимо выбрать 2 типа заказов!', false);
+                    return;
+                }
+                
+                if (missingFields.length > 0) {
+                    showNotification(`Необходимо выбрать значение в: ${missingFields.join(', ')}`, false);
+                    return;
+                }
+                
+                configData = JSON.parse(configEdit.value);
+                
+                const configStr = JSON.stringify(configData, null, 2);
+                const blob = new Blob([configStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'iikoConfig.json';
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                showNotification('Конфигурация успешно скачана');
+            } catch (e) {
+                console.error('Ошибка генерации конфига:', e);
+                showNotification('Ошибка генерации конфига. Проверьте правильность данных.', false);
+            }
+        });
+
+        resetConfigBtn.addEventListener('click', () => {
+            resetConfig();
+            showNotification('Конфигурация сброшена');
+        });
+    </script>
+</body>
+</html>
