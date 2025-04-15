@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUALT iiko API Integration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iiko API Integration</title>
     <style>
         :root {
             --bg-color: #f5f5f5;
@@ -39,6 +39,12 @@
             --notification-text: #000;
         }
 
+        * {
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -47,6 +53,8 @@
             padding: 10px;
             transition: all 0.3s ease;
             font-size: 14px;
+            width: 100%;
+            overflow-x: hidden;
         }
 
         .container {
@@ -64,6 +72,8 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
+            width: 100%;
+            overflow: hidden;
         }
 
         .full-width {
@@ -82,6 +92,7 @@
             transition: all 0.3s ease;
             font-size: 14px;
             width: 100%;
+            white-space: nowrap;
         }
 
         button:hover {
@@ -101,6 +112,9 @@
             max-height: 300px;
             transition: all 0.3s ease;
             font-size: 13px;
+            width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         input, select, textarea {
@@ -114,6 +128,7 @@
             color: var(--text-color);
             transition: all 0.3s ease;
             font-size: 14px;
+            max-width: 100%;
         }
 
         .status {
@@ -122,6 +137,7 @@
             border-radius: 4px;
             transition: all 0.3s ease;
             font-size: 14px;
+            width: 100%;
         }
 
         .success {
@@ -144,6 +160,10 @@
             display: flex;
             align-items: center;
             font-size: 14px;
+            background-color: var(--container-bg);
+            padding: 5px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .theme-toggle {
@@ -186,6 +206,7 @@
             background-color: rgba(0,0,0,0.03);
             transition: all 0.3s ease;
             position: relative;
+            width: 100%;
         }
 
         .data-item:hover {
@@ -199,6 +220,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
         }
 
         .data-row {
@@ -206,6 +228,7 @@
             flex-direction: column;
             margin-bottom: 6px;
             padding: 4px 0;
+            width: 100%;
         }
 
         .data-label {
@@ -214,6 +237,7 @@
             opacity: 0.8;
             margin-bottom: 4px;
             font-size: 14px;
+            width: 100%;
         }
 
         .price-categories {
@@ -221,12 +245,14 @@
             padding: 8px;
             background-color: rgba(0,0,0,0.05);
             border-radius: 4px;
+            width: 100%;
         }
 
         .debug-container {
             margin-top: 15px;
             border-radius: 6px;
             overflow: hidden;
+            width: 100%;
         }
 
         .debug-header {
@@ -246,6 +272,7 @@
             transition: max-height 0.3s ease;
             background-color: var(--pre-bg);
             font-size: 13px;
+            width: 100%;
         }
     
         .debug-content.expanded {
@@ -284,6 +311,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            white-space: normal;
         }
 
         .debug-toggle:hover {
@@ -298,17 +326,20 @@
             padding: 8px;
             background-color: rgba(0,0,0,0.03);
             border-radius: 4px;
+            width: 100%;
         }
 
         .section-title {
             display: flex;
             flex-direction: column;
             margin-bottom: 12px;
+            width: 100%;
         }
 
         .section-title h2 {
             margin: 0 0 8px 0;
             font-size: 18px;
+            width: 100%;
         }
 
         .action-buttons {
@@ -316,12 +347,15 @@
             flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 12px;
+            width: 100%;
         }
 
         .checkbox-container {
             display: flex;
             align-items: center;
             margin-top: 8px;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .checkbox-custom {
@@ -365,12 +399,14 @@
             padding: 15px;
             background-color: rgba(0,0,0,0.05);
             border-radius: 6px;
+            width: 100%;
         }
 
         .config-title {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 12px;
+            width: 100%;
         }
 
         .generate-btn {
@@ -392,7 +428,7 @@
         }
 
         .menu-type-selector {
-            margin-left: 8px;
+            margin-left: 0;
             margin-top: 8px;
             width: 100%;
         }
@@ -409,10 +445,12 @@
             flex-direction: column;
             gap: 8px;
             margin-top: 15px;
+            width: 100%;
         }
 
         .sections-container {
             margin-top: 15px;
+            width: 100%;
         }
         
         .section-item {
@@ -420,12 +458,14 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 12px;
+            width: 100%;
         }
         
         .section-header {
             font-weight: bold;
             margin-bottom: 8px;
             font-size: 15px;
+            width: 100%;
         }
         
         .tables-container {
@@ -433,6 +473,7 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 12px;
+            width: 100%;
         }
         
         .tables-header {
@@ -446,6 +487,7 @@
             margin: 5px 0;
             background-color: rgba(0,0,0,0.03);
             border-radius: 4px;
+            width: 100%;
         }
         
         .table-item:hover {
@@ -488,6 +530,7 @@
             color: var(--text-color);
             margin-bottom: 12px;
             font-size: 13px;
+            max-width: 100%;
         }
 
         .notification {
@@ -505,6 +548,8 @@
             max-width: 90%;
             text-align: center;
             font-size: 14px;
+            width: auto;
+            white-space: normal;
         }
 
         .notification.show {
@@ -528,6 +573,7 @@
             max-height: 400px;
             overflow-y: auto;
             margin-bottom: 12px;
+            width: 100%;
         }
         
         .response-container::-webkit-scrollbar {
@@ -550,6 +596,7 @@
 
         .section-selector {
             margin-bottom: 12px;
+            width: 100%;
         }
 
         .section-selector select {
@@ -571,10 +618,6 @@
         }
 
         @media (min-width: 480px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            
             button {
                 width: auto;
             }
