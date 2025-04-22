@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iiko API Integration</title>
     <style>
         :root {
@@ -20,6 +20,7 @@
             --reset-hover: #d32f2f;
             --notification-bg: rgba(0, 0, 0, 0.8);
             --notification-text: #fff;
+            --loading-color: #2196F3;
         }
 
         .dark-theme {
@@ -37,43 +38,34 @@
             --reset-hover: #b71c1c;
             --notification-bg: rgba(255, 255, 255, 0.9);
             --notification-text: #000;
+            --loading-color: #64B5F6;
         }
 
-        * {
-            box-sizing: border-box;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
+        /* Все остальные стили остаются без изменений */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 10px;
+            padding: 20px;
             transition: all 0.3s ease;
-            font-size: 14px;
-            width: 100%;
-            overflow-x: hidden;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         .panel {
             background-color: var(--container-bg);
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
-            width: 100%;
-            overflow: hidden;
         }
 
         .full-width {
@@ -84,15 +76,13 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 12px;
+            padding: 10px 15px;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 8px;
-            margin-bottom: 8px;
+            margin-right: 10px;
+            margin-bottom: 10px;
             transition: all 0.3s ease;
             font-size: 14px;
-            width: 100%;
-            white-space: nowrap;
         }
 
         button:hover {
@@ -106,38 +96,30 @@
 
         pre {
             background-color: var(--pre-bg);
-            padding: 12px;
+            padding: 15px;
             border-radius: 4px;
             overflow-x: auto;
             max-height: 300px;
             transition: all 0.3s ease;
-            font-size: 13px;
-            width: 100%;
-            white-space: pre-wrap;
-            word-wrap: break-word;
         }
 
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 10px;
-            margin: 8px 0;
+            margin: 10px 0;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             box-sizing: border-box;
             background-color: var(--container-bg);
             color: var(--text-color);
             transition: all 0.3s ease;
-            font-size: 14px;
-            max-width: 100%;
         }
 
         .status {
-            padding: 8px;
-            margin: 8px 0;
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 4px;
             transition: all 0.3s ease;
-            font-size: 14px;
-            width: 100%;
         }
 
         .success {
@@ -154,31 +136,26 @@
 
         .theme-toggle-container {
             position: fixed;
-            top: 10px;
-            right: 10px;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
             display: flex;
             align-items: center;
-            font-size: 14px;
-            background-color: var(--container-bg);
-            padding: 5px 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .theme-toggle {
-            width: 50px;
-            height: 26px;
+            width: 60px;
+            height: 30px;
             background-color: var(--border-color);
-            border-radius: 13px;
+            border-radius: 15px;
             position: relative;
             cursor: pointer;
-            margin-left: 8px;
+            margin-left: 10px;
         }
 
         .theme-toggle-handle {
-            width: 22px;
-            height: 22px;
+            width: 26px;
+            height: 26px;
             background-color: var(--container-bg);
             border-radius: 50%;
             position: absolute;
@@ -191,22 +168,21 @@
         }
 
         .theme-toggle-handle img {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
 
         .dark-theme .theme-toggle-handle {
-            transform: translateX(26px);
+            transform: translateX(30px);
         }
 
         .data-item {
-            margin-bottom: 12px;
-            padding: 12px;
+            margin-bottom: 15px;
+            padding: 15px;
             border-radius: 6px;
             background-color: rgba(0,0,0,0.03);
             transition: all 0.3s ease;
             position: relative;
-            width: 100%;
         }
 
         .data-item:hover {
@@ -215,51 +191,45 @@
 
         .data-title {
             font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
         }
 
         .data-row {
             display: flex;
-            flex-direction: column;
-            margin-bottom: 6px;
-            padding: 4px 0;
-            width: 100%;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 5px 0;
         }
 
         .data-label {
+            min-width: 120px;
             font-weight: 500;
             color: var(--text-color);
             opacity: 0.8;
-            margin-bottom: 4px;
-            font-size: 14px;
-            width: 100%;
         }
 
         .price-categories {
-            margin-top: 8px;
-            padding: 8px;
+            margin-top: 10px;
+            padding: 10px;
             background-color: rgba(0,0,0,0.05);
             border-radius: 4px;
-            width: 100%;
         }
 
         .debug-container {
-            margin-top: 15px;
+            margin-top: 20px;
             border-radius: 6px;
             overflow: hidden;
-            width: 100%;
         }
 
         .debug-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 10px;
+            padding: 8px 12px;
             background-color: rgba(0,0,0,0.1);
             cursor: pointer;
             width: 100%;
@@ -271,28 +241,26 @@
             overflow: hidden;
             transition: max-height 0.3s ease;
             background-color: var(--pre-bg);
-            font-size: 13px;
-            width: 100%;
         }
-    
+        
         .debug-content.expanded {
-            padding: 10px;
-            max-height: 300px;
+            padding: 12px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
         .debug-content::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         
         .debug-content::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.05);
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .debug-content::-webkit-scrollbar-thumb {
             background: rgba(0,0,0,0.2);
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .debug-content::-webkit-scrollbar-thumb:hover {
@@ -304,14 +272,13 @@
             border: none;
             color: var(--secondary-color);
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             padding: 0;
             width: 100%;
             text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            white-space: normal;
         }
 
         .debug-toggle:hover {
@@ -321,61 +288,54 @@
 
         .org-id-container {
             display: flex;
-            flex-direction: column;
-            margin-top: 8px;
-            padding: 8px;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
             background-color: rgba(0,0,0,0.03);
             border-radius: 4px;
-            width: 100%;
         }
 
         .section-title {
             display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
-            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
         .section-title h2 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-            width: 100%;
+            margin: 0;
         }
 
         .action-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-            width: 100%;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .checkbox-container {
             display: flex;
             align-items: center;
-            margin-top: 8px;
-            width: 100%;
-            flex-wrap: wrap;
+            margin-left: 15px;
         }
 
         .checkbox-custom {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border: 2px solid var(--checkbox-color);
             border-radius: 3px;
             display: inline-block;
             position: relative;
             cursor: pointer;
-            margin-right: 6px;
         }
 
         .checkbox-custom::after {
             content: "";
             position: absolute;
-            left: 4px;
+            left: 5px;
             top: 1px;
-            width: 4px;
-            height: 8px;
+            width: 5px;
+            height: 10px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
@@ -395,23 +355,21 @@
         }
 
         .config-panel {
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 30px;
+            padding: 20px;
             background-color: rgba(0,0,0,0.05);
             border-radius: 6px;
-            width: 100%;
         }
 
         .config-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 12px;
-            width: 100%;
+            margin-bottom: 15px;
         }
 
         .generate-btn {
             background-color: var(--secondary-color);
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .generate-btn:hover {
@@ -420,7 +378,7 @@
 
         .reset-btn {
             background-color: var(--reset-color);
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .reset-btn:hover {
@@ -428,66 +386,59 @@
         }
 
         .menu-type-selector {
-            margin-left: 0;
-            margin-top: 8px;
-            width: 100%;
+            margin-left: 10px;
         }
 
         .menu-type-selector select {
-            width: 100%;
-            padding: 6px;
-            margin-left: 0;
-            margin-top: 4px;
+            width: auto;
+            padding: 5px;
+            margin-left: 5px;
         }
 
         .config-actions {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 15px;
-            width: 100%;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .sections-container {
-            margin-top: 15px;
-            width: 100%;
+            margin-top: 20px;
         }
         
         .section-item {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 12px;
-            width: 100%;
+            padding: 15px;
         }
         
         .section-header {
             font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 15px;
-            width: 100%;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
         
         .tables-container {
-            margin-top: 8px;
+            margin-top: 10px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 12px;
-            width: 100%;
+            padding: 15px;
         }
         
         .tables-header {
-            display: none;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
         
         .table-item {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             padding: 8px;
             margin: 5px 0;
             background-color: rgba(0,0,0,0.03);
             border-radius: 4px;
-            width: 100%;
         }
         
         .table-item:hover {
@@ -495,65 +446,72 @@
         }
         
         .table-number {
+            width: 80px;
             font-weight: bold;
-            margin-bottom: 4px;
         }
         
         .table-name {
-            margin: 4px 0;
+            flex-grow: 1;
+            margin: 0 10px;
         }
         
         .table-id {
+            width: 300px;
             font-family: monospace;
             color: var(--secondary-color);
-            font-size: 13px;
-            margin: 4px 0;
-            word-break: break-all;
         }
         
         .select-table-btn {
-            margin-top: 8px;
-            padding: 6px 8px;
-            font-size: 13px;
-            width: auto;
-            align-self: flex-start;
+            margin-left: 15px;
+            padding: 2px 8px;
+            font-size: 12px;
         }
 
         .config-edit {
             width: 100%;
-            min-height: 250px;
+            min-height: 300px;
             font-family: monospace;
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             background-color: var(--container-bg);
             color: var(--text-color);
-            margin-bottom: 12px;
-            font-size: 13px;
-            max-width: 100%;
+            margin-bottom: 15px;
         }
 
         .notification {
             position: fixed;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 20px;
+            padding: 15px 25px;
             background-color: var(--notification-bg);
             color: var(--notification-text);
             border-radius: 4px;
             z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s ease;
-            max-width: 90%;
+            max-width: 80%;
             text-align: center;
-            font-size: 14px;
-            width: auto;
-            white-space: normal;
         }
 
         .notification.show {
             opacity: 1;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--loading-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .rualt-highlight,
@@ -570,24 +528,23 @@
         }
         
         .response-container {
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
-            margin-bottom: 12px;
-            width: 100%;
+            margin-bottom: 15px;
         }
         
         .response-container::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         
         .response-container::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.05);
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .response-container::-webkit-scrollbar-thumb {
             background: rgba(0,0,0,0.2);
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         .response-container::-webkit-scrollbar-thumb:hover {
@@ -595,8 +552,7 @@
         }
 
         .section-selector {
-            margin-bottom: 12px;
-            width: 100%;
+            margin-bottom: 15px;
         }
 
         .section-selector select {
@@ -605,126 +561,66 @@
             margin-top: 5px;
         }
 
-        .select-btn {
-            margin-top: 8px;
-            width: auto;
-            align-self: flex-start;
-        }
-
-        .copy-btn {
-            margin-top: 8px;
-            width: auto;
-            align-self: flex-start;
-        }
-
-        @media (min-width: 480px) {
-            button {
-                width: auto;
-            }
-            
-            .config-actions {
-                flex-direction: row;
-            }
-            
-            .action-buttons {
-                flex-direction: row;
-            }
-            
-            .data-row {
-                flex-direction: row;
-                align-items: center;
-            }
-            
-            .data-label {
-                min-width: 100px;
-                margin-bottom: 0;
-            }
-        }
-
-        @media (min-width: 768px) {
-            body {
-                padding: 15px;
-                font-size: 15px;
-            }
-            
+        @media (max-width: 768px) {
             .container {
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
+                grid-template-columns: 1fr;
             }
             
             .panel {
-                padding: 20px;
+                padding: 15px;
             }
             
             .data-row {
-                flex-direction: row;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .data-label {
+                margin-bottom: 5px;
             }
             
             .checkbox-container {
-                margin-left: 15px;
-                margin-top: 0;
+                margin-top: 10px;
             }
             
-            .menu-type-selector {
-                margin-left: 10px;
-                margin-top: 0;
-                width: auto;
-            }
-            
-            .menu-type-selector select {
-                width: auto;
-                margin-left: 5px;
-                margin-top: 0;
-            }
-            
-            .config-actions {
-                flex-direction: row;
-            }
-            
-            .tables-header {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-                font-weight: bold;
-            }
-            
-            .table-item {
-                flex-direction: row;
-                align-items: center;
-            }
-            
-            .table-number {
-                width: 60px;
-            }
-            
-            .table-name {
-                flex-grow: 1;
-                margin: 0 10px;
-            }
-            
-            .table-id {
-                width: 200px;
-                word-break: normal;
-            }
-            
-            .select-table-btn {
-                margin-left: 15px;
-                margin-top: 0;
-            }
-            
-            .select-btn {
-                margin-left: 15px;
-                margin-top: 0;
+            .theme-toggle-container {
+                top: 10px;
+                right: 10px;
             }
         }
 
-        @media (min-width: 992px) {
-            .container {
-                max-width: 1200px;
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
             }
             
-            .table-id {
-                width: 250px;
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .config-actions {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .table-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .table-number, .table-name, .table-id {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .select-table-btn {
+                margin-left: 0;
+                margin-top: 10px;
             }
         }
     </style>
@@ -744,7 +640,7 @@
     <div class="container">
         <div class="panel full-width">
             <div class="section-title">
-                <h2>Авторизация</h2>
+                <h2>Авторизация api</h2>
             </div>
             <input type="text" id="apiKey" placeholder="Введите API ключ iiko">
             <button id="getToken">Получить токен</button>
@@ -761,7 +657,7 @@
                 <div id="orgIdContainer" class="org-id-container" style="margin-top: 10px;">
                     <span class="data-label">ID организации: </span>
                     <span id="orgIdValue" style="font-family: monospace;"></span>
-                    <button class="select-btn" id="selectOrgBtn">Выбрать</button>
+                    <button class="select-btn" id="selectOrgBtn" style="margin-left: 15px;">Выбрать</button>
                 </div>
             </div>
             <div id="orgsStatus" class="status"></div>
@@ -916,7 +812,6 @@
         const tablesSection = document.getElementById('tablesSection');
         const tablesResult = document.getElementById('tablesResult');
         const sectionSelect = document.getElementById('sectionSelect');
-        const sectionSelectorContainer = document.getElementById('sectionSelectorContainer');
         const orderTypesSection = document.getElementById('orderTypesSection');
         const orderTypesResult = document.getElementById('orderTypesResult');
         const paymentTypesSection = document.getElementById('paymentTypesSection');
@@ -962,6 +857,11 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+        }
+
+        function showLoadingNotification(message) {
+            notification.innerHTML = `<span class="loading-spinner"></span>${message}`;
+            notification.className = 'notification show';
         }
 
         function toggleDebug(id) {
@@ -1057,18 +957,6 @@
             orderTypesSection.style.display = 'none';
             paymentTypesSection.style.display = 'none';
             configSection.style.display = 'none';
-            
-            configData = {
-                ...configData,
-                ExternalMenuId: "",
-                AssetsProfileId: "",
-                OrganizationId: "",
-                TerminalGroupId: "",
-                PaymentTypeId: "",
-                TableId: "",
-                OrderTypes: []
-            };
-            updateConfigEdit();
         }
 
         // 1. Получение токена
@@ -1108,7 +996,7 @@
                 updateConfigEdit();
                 
                 orgSection.style.display = 'block';
-                fetchAllData();
+                await fetchOrganizations();
 
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -1116,26 +1004,6 @@
                 showStatus(tokenStatus, `Ошибка: ${error.message}`, false);
             }
         });
-
-        async function fetchAllData() {
-            try {
-                await fetchOrganizations();
-                await fetchData('/api/2/menu', menuResult, displayMenuData);
-                await fetchData('/api/1/terminal_groups', terminalsResult, displayTerminalsData);
-                await fetchData('/api/1/deliveries/order_types', orderTypesResult, displayOrderTypesData);
-                await fetchData('/api/1/payment_types', paymentTypesResult, displayPaymentTypesData);
-                
-                menuSection.style.display = 'block';
-                terminalsSection.style.display = 'block';
-                tablesSection.style.display = 'block';
-                orderTypesSection.style.display = 'block';
-                paymentTypesSection.style.display = 'block';
-                configSection.style.display = 'block';
-
-            } catch (error) {
-                console.error('Ошибка при получении данных:', error);
-            }
-        }
 
         async function fetchOrganizations() {
             try {
@@ -1165,36 +1033,25 @@
                 const data = await response.json();
                 document.getElementById('orgsDebug').textContent = JSON.stringify(data, null, 2);
                 
-                if (data.organizations && data.organizations.length > 0) {
-                    selectedOrgId = data.organizations[0].id;
-                }
-                
                 orgSelect.innerHTML = '';
                 data.organizations.forEach(org => {
                     const option = document.createElement('option');
                     option.value = org.id;
                     option.textContent = `${org.name} (${org.id})`;
                     orgSelect.appendChild(option);
-                    
-                    if (orgSelect.selectedIndex === -1) {
-                        orgSelect.selectedIndex = 0;
-                        selectedOrgId = org.id;
-                    }
                 });
 
                 document.getElementById('orgSelectContainer').style.display = 'block';
-                updateOrgIdDisplay();
-
-                orgSelect.addEventListener('change', (e) => {
-                    selectedOrgId = e.target.value;
+                
+                // Выбираем первую организацию по умолчанию
+                if (orgSelect.options.length > 0) {
+                    orgSelect.selectedIndex = 0;
+                    selectedOrgId = orgSelect.value;
                     updateOrgIdDisplay();
-                });
-
-                selectOrgBtn.addEventListener('click', () => {
-                    configData.OrganizationId = selectedOrgId;
-                    updateConfigEdit();
-                    showNotification(`Организация "${orgSelect.options[orgSelect.selectedIndex].text}" выбрана`);
-                });
+                    
+                    // Автоматически выбираем организацию и загружаем данные
+                    selectOrgBtn.click();
+                }
 
                 showStatus(orgsStatus, 'Организации успешно получены', true);
 
@@ -1209,13 +1066,70 @@
             orgIdValue.textContent = selectedOrgId;
         }
 
+        selectOrgBtn.addEventListener('click', async () => {
+            selectedOrgId = orgSelect.value;
+            configData.OrganizationId = selectedOrgId;
+            updateOrgIdDisplay();
+            updateConfigEdit();
+            
+            const orgName = orgSelect.options[orgSelect.selectedIndex].text;
+            showLoadingNotification(`Загрузка данных для организации "${orgName}"...`);
+            
+            try {
+                await fetchAllData();
+                showNotification(`Данные для организации "${orgName}" успешно загружены`);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+                showNotification(`Ошибка при загрузке данных: ${error.message}`, false);
+            }
+        });
+
+        async function fetchAllData() {
+            if (!selectedOrgId) {
+                showNotification('Сначала выберите организацию', false);
+                return;
+            }
+
+            try {
+                // Показываем индикаторы загрузки
+                menuResult.innerHTML = '<div>Загрузка данных меню...</div>';
+                terminalsResult.innerHTML = '<div>Загрузка данных терминалов...</div>';
+                tablesResult.innerHTML = '<div>Загрузка данных столов...</div>';
+                orderTypesResult.innerHTML = '<div>Загрузка типов заказов...</div>';
+                paymentTypesResult.innerHTML = '<div>Загрузка типов оплат...</div>';
+                
+                // Показываем все разделы
+                menuSection.style.display = 'block';
+                terminalsSection.style.display = 'block';
+                tablesSection.style.display = 'block';
+                orderTypesSection.style.display = 'block';
+                paymentTypesSection.style.display = 'block';
+                configSection.style.display = 'block';
+
+                // Загружаем данные параллельно для ускорения
+                await Promise.all([
+                    fetchData('/api/2/menu', menuResult, displayMenuData),
+                    fetchData('/api/1/terminal_groups', terminalsResult, displayTerminalsData),
+                    fetchData('/api/1/deliveries/order_types', orderTypesResult, displayOrderTypesData),
+                    fetchData('/api/1/payment_types', paymentTypesResult, displayPaymentTypesData)
+                ]);
+
+            } catch (error) {
+                console.error('Ошибка при получении данных:', error);
+                showNotification(`Ошибка при загрузке данных: ${error.message}`, false);
+            }
+        }
+
         async function fetchData(endpoint, resultElement, displayFunction) {
             try {
                 if (!selectedOrgId) {
                     throw new Error('Не выбрана организация');
                 }
 
-                let requestBody = { token: token };
+                let requestBody = { 
+                    token: token,
+                    organizationIds: [selectedOrgId]
+                };
 
                 switch(endpoint) {
                     case '/api/2/menu':
@@ -1615,7 +1529,7 @@
                 
                 checkbox.addEventListener('change', (e) => {
                     if (e.target.checked) {
-                        menuTypeSelector.style.display = 'block';
+                        menuTypeSelector.style.display = 'inline-block';
                     } else {
                         menuTypeSelector.style.display = 'none';
                         menuTypeSelect.value = "";
@@ -1725,6 +1639,7 @@
                 const selectBtn = document.createElement('button');
                 selectBtn.className = 'select-btn';
                 selectBtn.textContent = 'Выбрать';
+                selectBtn.style.marginLeft = '15px';
                 selectBtn.addEventListener('click', () => {
                     configData.TerminalGroupId = terminal.id;
                     updateConfigEdit();
@@ -1892,6 +1807,7 @@
                 const selectBtn = document.createElement('button');
                 selectBtn.className = 'select-btn';
                 selectBtn.textContent = 'Выбрать';
+                selectBtn.style.marginLeft = '15px';
                 selectBtn.addEventListener('click', () => {
                     configData.PaymentTypeId = paymentType.id;
                     updateConfigEdit();
