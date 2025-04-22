@@ -142,41 +142,67 @@
         }
     
         .theme-toggle-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            background-color: var(--container-bg);
-            padding: 5px 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    background-color: var(--container-bg);
+    padding: 5px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* Увеличиваем область клика */
+    padding: 12px 15px;
+    margin: -7px -10px; /* Компенсируем увеличение */
+}
     
-        .theme-toggle {
-            width: 50px;
-            height: 25px;
-            background-color: var(--border-color);
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-            margin-left: 8px;
-        }
+.theme-toggle {
+    width: 50px;
+    height: 25px;
+    background-color: var(--border-color);
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+    margin-left: 8px;
+    /* Делаем весь элемент кликабельным */
+    position: relative;
+    z-index: 2;
+}
     
-        .theme-toggle-handle {
-            width: 21px;
-            height: 21px;
-            background-color: var(--container-bg);
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.theme-toggle-handle {
+    width: 21px;
+    height: 21px;
+    background-color: var(--container-bg);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.theme-toggle::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    z-index: 1;
+}
+
+        /* Улучшаем отзывчивость на мобильных */
+        .theme-toggle:active {
+        transform: scale(0.95);
+    }
     
         .theme-toggle-handle img {
             width: 14px;
@@ -585,6 +611,30 @@
     
         /* Стили для планшетов */
         @media (min-width: 600px) {
+    .theme-toggle-container {
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        z-index: 1300;
+    }
+    
+    .theme-toggle {
+        width: 55px;
+        height: 28px;
+        margin-left: 10px;
+    }
+    
+    .theme-toggle-handle {
+        width: 24px;
+        height: 24px;
+        top: 2px;
+        left: 2px;
+    }
+    
+    .dark-theme .theme-toggle-handle {
+        transform: translateX(27px);
+    }
+
             .container {
                 grid-template-columns: 1fr 1fr;
             }
@@ -694,11 +744,45 @@
             .theme-toggle-container {
                 top: 20px;
                 right: 20px;
+                z-index: 1300;
             }
         }
     
         /* Очень маленькие экраны */
         @media (max-width: 360px) {
+            .theme-toggle-container {
+        top: 8px;
+        right: 8px;
+        padding: 4px 8px;
+        font-size: 12px;
+        z-index: 1300;
+    }
+    
+    .theme-toggle {
+        width: 42px;
+        height: 22px;
+        margin-left: 6px;
+    }
+    
+    .theme-toggle-handle {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .dark-theme .theme-toggle-handle {
+        transform: translateX(20px);
+    }
+    
+    /* Увеличиваем область клика */
+    .theme-toggle::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+    }
+            
             body {
                 padding: 10px;
                 font-size: 13px;
@@ -760,7 +844,7 @@
                 <div id="orgIdContainer" class="org-id-container" style="margin-top: 10px;">
                     <span class="data-label">ID организации: </span>
                     <span id="orgIdValue" style="font-family: monospace;"></span>
-                    <button class="select-btn" id="selectOrgBtn" style="margin-left: 15px;">Выбрать</button>
+                    <button class="select-btn" id="selectOrgBtn" >Выбрать</button>
                 </div>
             </div>
             <div id="orgsStatus" class="status"></div>
@@ -920,6 +1004,7 @@
         const paymentTypesSection = document.getElementById('paymentTypesSection');
         const paymentTypesResult = document.getElementById('paymentTypesResult');
         const themeToggle = document.getElementById('themeToggle');
+        const themeToggleContainer = document.querySelector('.theme-toggle-container');
         const themeIcon = document.getElementById('themeIcon');
         const configSection = document.getElementById('configSection');
         const configEdit = document.getElementById('configEdit');
@@ -939,13 +1024,51 @@
             themeIcon.src = sunIcon;
         }
 
-        // Переключение темы
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            const isDark = document.body.classList.contains('dark-theme');
-            themeIcon.src = isDark ? moonIcon : sunIcon;
-            localStorage.setItem('darkTheme', isDark ? 'enabled' : 'disabled');
-        });
+
+
+        
+// Функция переключения темы
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    themeIcon.src = isDark ? moonIcon : sunIcon;
+    localStorage.setItem('darkTheme', isDark ? 'enabled' : 'disabled');
+}
+
+// Обработчики событий
+function setupThemeToggle() {
+    // Проверяем, существуют ли элементы на странице
+    if (!themeToggle || !themeToggleContainer || !themeIcon) {
+        console.error('One or more theme toggle elements not found!');
+        return;
+    }
+
+    // Вешаем обработчики
+    themeToggle.addEventListener('click', function(e) {
+        e.stopPropagation(); // Предотвращаем всплытие
+        toggleTheme();
+    });
+
+    themeToggleContainer.addEventListener('click', function(e) {
+        // Если кликнули не по самому переключателю
+        if (e.target === themeToggleContainer) {
+            toggleTheme();
+        }
+    });
+
+    // Инициализация темы
+    if (localStorage.getItem('darkTheme') === 'enabled') {
+        document.body.classList.add('dark-theme');
+        themeIcon.src = moonIcon;
+    } else {
+        themeIcon.src = sunIcon;
+    }
+}
+
+// Инициализируем при загрузке страницы
+document.addEventListener('DOMContentLoaded', setupThemeToggle);
+
+
 
         function showStatus(element, message, isSuccess) {
             element.textContent = message;
@@ -1742,7 +1865,7 @@
                 const selectBtn = document.createElement('button');
                 selectBtn.className = 'select-btn';
                 selectBtn.textContent = 'Выбрать';
-                selectBtn.style.marginLeft = '15px';
+
                 selectBtn.addEventListener('click', () => {
                     configData.TerminalGroupId = terminal.id;
                     updateConfigEdit();
@@ -1910,7 +2033,7 @@
                 const selectBtn = document.createElement('button');
                 selectBtn.className = 'select-btn';
                 selectBtn.textContent = 'Выбрать';
-                selectBtn.style.marginLeft = '15px';
+
                 selectBtn.addEventListener('click', () => {
                     configData.PaymentTypeId = paymentType.id;
                     updateConfigEdit();
