@@ -744,7 +744,7 @@
     <div class="container">
         <div class="panel full-width">
             <div class="section-title">
-                <h2>Авторизация1</h2>
+                <h2>Авторизация</h2>
             </div>
             <input type="text" id="apiKey" placeholder="Введите API ключ iiko">
             <button id="getToken">Получить токен</button>
@@ -1117,25 +1117,39 @@
             }
         });
 
-        async function fetchAllData() {
-            try {
-                await fetchOrganizations();
-                await fetchData('/api/2/menu', menuResult, displayMenuData);
-                await fetchData('/api/1/terminal_groups', terminalsResult, displayTerminalsData);
-                await fetchData('/api/1/deliveries/order_types', orderTypesResult, displayOrderTypesData);
-                await fetchData('/api/1/payment_types', paymentTypesResult, displayPaymentTypesData);
-                
-                menuSection.style.display = 'block';
-                terminalsSection.style.display = 'block';
-                tablesSection.style.display = 'block';
-                orderTypesSection.style.display = 'block';
-                paymentTypesSection.style.display = 'block';
-                configSection.style.display = 'block';
+async function fetchAllData() {
+    if (!selectedOrgId) {
+        showNotification('Сначала выберите организацию', false);
+        return;
+    }
 
-            } catch (error) {
-                console.error('Ошибка при получении данных:', error);
-            }
-        }
+    try {
+        // Очищаем результаты перед загрузкой новых данных
+        menuResult.innerHTML = '';
+        terminalsResult.innerHTML = '';
+        tablesResult.innerHTML = '';
+        orderTypesResult.innerHTML = '';
+        paymentTypesResult.innerHTML = '';
+        
+        // Загружаем данные для новой организации
+        await fetchData('/api/2/menu', menuResult, displayMenuData);
+        await fetchData('/api/1/terminal_groups', terminalsResult, displayTerminalsData);
+        await fetchData('/api/1/deliveries/order_types', orderTypesResult, displayOrderTypesData);
+        await fetchData('/api/1/payment_types', paymentTypesResult, displayPaymentTypesData);
+        
+        // Показываем все разделы
+        menuSection.style.display = 'block';
+        terminalsSection.style.display = 'block';
+        tablesSection.style.display = 'block';
+        orderTypesSection.style.display = 'block';
+        paymentTypesSection.style.display = 'block';
+        configSection.style.display = 'block';
+
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+        showNotification(`Ошибка при загрузке данных: ${error.message}`, false);
+    }
+}
 
         async function fetchOrganizations() {
             try {
@@ -1209,13 +1223,16 @@
             orgIdValue.textContent = selectedOrgId;
         }
 
-        async function fetchData(endpoint, resultElement, displayFunction) {
-            try {
-                if (!selectedOrgId) {
-                    throw new Error('Не выбрана организация');
-                }
+async function fetchData(endpoint, resultElement, displayFunction) {
+    try {
+        if (!selectedOrgId) {
+            throw new Error('Не выбрана организация');
+        }
 
-                let requestBody = { token: token };
+        let requestBody = { 
+            token: token,
+            organizationIds: [selectedOrgId] // Всегда используем текущую выбранную организацию
+        };
 
                 switch(endpoint) {
                     case '/api/2/menu':
